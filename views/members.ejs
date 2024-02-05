@@ -1,0 +1,16 @@
+<%- include("templates/header") %>
+    <div class="container-fluid">
+        <h1>Hello, <%= username %>!</h1>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-4 bordered-column">
+                <img src="<%= randomImage %>" class="img-responsive uniform-image" alt="Random cat image" />
+            </div>
+        </div>
+    </div>
+
+    <div style="padding-top: 20px; padding-bottom: 10px;">
+        <button onclick="window.location.href = '/signout'">Sign out</button>
+    </div>
+    <%- include("templates/footer") %>
