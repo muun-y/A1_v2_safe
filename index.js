@@ -16,7 +16,7 @@ const port = process.env.PORT || 3000;
 
 const app = express();
 
-const expireTime = 24 * 60 * 60 * 1000; //expires after 1 day  (hours * minutes * seconds * millis)
+const expireTime = 1 * 60 * 60 * 1000; //expires after 1 day  (hours * minutes * seconds * millis)
 
 /* secret information section */
 const mongodb_user = process.env.MONGODB_USER;
@@ -57,6 +57,7 @@ app.get("/", (req, res) => {
   res.render("index");
 });
 
+//prevent HTML injection
 const escapeHtml = (unsafe) => {
   return unsafe
     .replace(/&/g, "&amp;")
@@ -87,6 +88,7 @@ app.get("/createTables", async (req, res) => {
 });
 
 app.get("/login", (req, res) => {
+  const errorMessage = req.query.errorMessage;
   res.render("login");
 });
 
@@ -122,10 +124,12 @@ app.post("/submitUser", async (req, res) => {
   if (success) {
     req.session.authenticated = true;
     req.session.username = username;
+    req.session.cookie.maxAge = expireTime;
+
     res.redirect("/members");
   } else {
     // If user creation fails, redirect back to /signup with an appropriate error message
-    const errorMessage = encodeURIComponent("Failed to create user.");
+    const errorMessage = encodeURIComponent("Username already exists.");
     res.redirect("/signup?error=" + errorMessage);
   }
 });
@@ -134,6 +138,7 @@ app.post("/loggingin", async (req, res) => {
   var username = req.body.username;
   var password = req.body.password;
   var errorMessage = "";
+
   var unescapeusername = unescapeHtml(username);
 
   var results = await db_users.getUser({
@@ -154,12 +159,14 @@ app.post("/loggingin", async (req, res) => {
       } else {
         console.log("invalid password");
         errorMessage = "INVALID PASSWORD. Please try again.";
+        return res.redirect("/login?errorMessage=" + errorMessage);
       }
     } else {
       console.log(
         "invalid number of users matched: " + results.length + " (expected 1)."
       );
       errorMessage = "User not found. Try again";
+      return res.redirect("/login?errorMessage=" + errorMessage);
     }
   }
   res.render("login", { error: errorMessage || "" });
@@ -215,26 +222,6 @@ app.get("/members", (req, res) => {
 app.get("/signout", (req, res) => {
   req.session.destroy();
   res.redirect("/");
-});
-
-app.get("/loggedin/info", (req, res) => {
-  res.render("loggedin-info");
-});
-
-app.get("/loggedin/admin", (req, res) => {
-  res.render("admin");
-});
-
-app.get("/loggedin/memberinfo", (req, res) => {
-  res.render("memberInfo", {
-    username: req.session.username,
-    user_type: req.session.user_type,
-  });
-});
-
-app.get("/cat/:id", (req, res) => {
-  var cat = req.params.id;
-  res.render("cat", { cat: cat });
 });
 
 app.get("/api", (req, res) => {
