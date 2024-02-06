@@ -89,7 +89,7 @@ app.get("/createTables", async (req, res) => {
 
 app.get("/login", (req, res) => {
   const errorMessage = req.query.errorMessage;
-  res.render("login");
+  res.render("login", { errorMessage: errorMessage });
 });
 
 app.get("/signup", (req, res) => {
@@ -157,7 +157,6 @@ app.post("/loggingin", async (req, res) => {
         res.redirect("/loggedIn");
         return;
       } else {
-        console.log("invalid password");
         errorMessage = "INVALID PASSWORD. Please try again.";
         return res.redirect("/login?errorMessage=" + errorMessage);
       }

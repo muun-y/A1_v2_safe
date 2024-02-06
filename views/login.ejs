@@ -1,8 +1,8 @@
 <%- include("templates/header") %>
     log in
-    <% if (typeof error !=='undefined' && error) { %>
+    <% if (errorMessage) { %>
         <p style="color: red;">
-            <%= error %>
+            <%= errorMessage %>
         </p>
         <% } %>
 
